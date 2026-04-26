@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # AI Cognitive Bias Detection Platform
 
 Production-style AI web application for detecting cognitive bias in user language, scoring confidence, and generating explainable reasoning through a polished SaaS-style interface.
@@ -127,3 +128,7 @@ Open `http://127.0.0.1:5000`.
 - The auth database is created automatically at `data/app_auth.db` on first run.
 - Model evaluation metrics are written to `model/baseline_metrics.json`.
 - Transformer support is optional and activates only when dependencies are available.
+=======
+# Biaslens-ai
+AI-powered cognitive bias detection platform using Gemini LLM + ML, with real-time analysis, chat assistant, and analytics dashboard.
+>>>>>>> 03c0c610e3c7cad5cb658bef632811d6dd6a0840

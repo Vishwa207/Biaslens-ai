@@ -21,15 +21,25 @@ auth_service = AuthService()
 def create_app() -> Flask:
     configure_logging()
 
+    import os
+    base_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    template_dir = os.path.join(base_dir, 'frontend', 'templates')
+    static_dir = os.path.join(base_dir, 'frontend', 'static')
+
     app = Flask(
         __name__,
-        template_folder="../frontend/templates",
-        static_folder="../frontend/static",
+        template_folder=template_dir,
+        static_folder=static_dir,
     )
     app.secret_key = get_secret_key()
     
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        "pool_pre_ping": True,
+        "pool_recycle": 300,
+        "connect_args": {"sslmode": "require"}
+    }
     
     db.init_app(app)
     
@@ -83,9 +93,9 @@ def create_app() -> Flask:
         }
 
     @app.get("/")
+    @page_login_required
     def root():
-        session.clear()
-        return redirect(url_for("login"))
+        return render_template("index.html", page="dashboard", **page_context())
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
