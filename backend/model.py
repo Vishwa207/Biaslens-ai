@@ -880,7 +880,7 @@ class CognitiveBiasModel:
         labels = [item["label"] for item in self.dataset]
 
         self.pipeline.fit(texts, labels)
-        predictions = [self.predict(text).bias for text in texts]
+        predictions = list(self.pipeline.predict(texts))
         classes = [str(class_name) for class_name in self.pipeline.classes_]
 
         metrics = {
@@ -897,8 +897,12 @@ class CognitiveBiasModel:
             "transformer_ready": self.transformer_option.available,
         }
 
-        ARTIFACT_PATH.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
-        LOGGER.info("Model trained and evaluation metrics stored at %s", ARTIFACT_PATH)
+        try:
+            ARTIFACT_PATH.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
+            LOGGER.info("Model trained and evaluation metrics stored at %s", ARTIFACT_PATH)
+        except OSError:
+            LOGGER.info("Read-only filesystem detected, skipping metric artifact write.")
+            
         return metrics
 
     def predict(self, text: str) -> PredictionResult:
