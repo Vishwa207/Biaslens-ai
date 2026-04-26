@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}AI Cognitive Bias Detection Platform{% endblock %}</title>
+<meta name="description" content="AI Cognitive Bias Detection Platform for explainable bias analysis, confidence scoring, and balanced-thinking guidance.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body data-page="{{ page }}">
+    <div class="backdrop-layer backdrop-one"></div>
+    <div class="backdrop-layer backdrop-two"></div>
+    <div class="backdrop-grid"></div>
+
+    <div class="app-shell">
+        <header class="topbar glass {% if is_auth_page %}topbar-auth{% endif %}">
+            <a class="brand" href="{{ url_for('dashboard') if current_user else url_for('login') }}">
+                <span class="brand-mark">AI</span>
+                <div class="brand-copy">
+                    <span class="brand-kicker">Cognitive Bias Studio</span>
+                    <strong>AI Cognitive Bias Detection Platform</strong>
+                </div>
+            </a>
+
+            <nav class="nav">
+                {% if current_user and not is_auth_page %}
+                <a href="/dashboard" class="nav-link {% if page == 'dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="/insights" class="nav-link {% if page == 'insights' %}active{% endif %}">Analytics</a>
+                <a href="/about" class="nav-link {% if page == 'about' %}active{% endif %}">About</a>
+                <div class="user-pill">
+                    <span>{{ current_user.full_name }}</span>
+                    <small>{{ current_user.email }}</small>
+                </div>
+                <form class="nav-form" method="post" action="/logout">
+                    <button class="ghost-btn" type="submit">Logout</button>
+                </form>
+                {% endif %}
+                <button id="themeToggle" class="ghost-btn theme-toggle" type="button" aria-label="Toggle theme">Theme</button>
+            </nav>
+        </header>
+
+        <main class="page-shell">
+            {% block content %}{% endblock %}
+        </main>
+
+        {% if not is_auth_page %}
+        <footer class="footer glass reveal">
+            <div>
+                <span class="eyebrow">Launch-Level Product</span>
+                <h3>Explainable AI workflows with personal analytics, secure access, and deployable product polish.</h3>
+            </div>
+            <div class="footer-meta">
+                <div class="footer-chip">
+                    <strong>{{ metrics.model_name if metrics is defined and metrics.model_name else "TF-IDF + Linear SVM" }}</strong>
+                    <span>Bias engine</span>
+                </div>
+                <div class="footer-chip">
+                    <strong>{{ "Enabled" if metrics is defined and metrics.transformer_ready else "Optional" }}</strong>
+                    <span>Transformer path</span>
+                </div>
+            </div>
+        </footer>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}About | AI Cognitive Bias Detection Platform{% endblock %}
+
+{% block content %}
+<section class="hero-grid reveal">
+    <div class="hero-copy glass">
+        <span class="eyebrow">Platform Overview</span>
+        <h2>A launch-ready AI SaaS experience for detecting cognitive bias, explaining the signal, and guiding better reframes.</h2>
+        <p>The product blends secure account access, explainable NLP classification, persistent thought history, and analytics-driven UX into one polished application.</p>
+    </div>
+
+    <div class="hero-side glass">
+        <span class="eyebrow">Current Snapshot</span>
+        <div class="detail-list">
+            <article class="detail-card">
+                <strong>Analyses</strong>
+                <span>{{ analytics.history_count }}</span>
+            </article>
+            <article class="detail-card">
+                <strong>Most Common Bias</strong>
+                <span>{{ analytics.most_common_bias }}</span>
+            </article>
+            <article class="detail-card">
+                <strong>Balanced Ratio</strong>
+                <span>{{ analytics.balanced_ratio }}%</span>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="analytics-grid reveal">
+    <div class="panel glass">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Core Product Pillars</span>
+                <h3>What Makes This Product Useful</h3>
+            </div>
+        </div>
+        <div class="detail-list">
+            <article class="detail-card"><strong>Explainable Detection</strong><span>Each prediction includes bias type, confidence, trigger highlights, and a readable explanation.</span></article>
+            <article class="detail-card"><strong>Suggestion Engine</strong><span>The result card reframes distorted language into a more balanced alternative.</span></article>
+            <article class="detail-card"><strong>Persistent Memory</strong><span>Drafts, analyses, and assistant conversations are stored per account in SQLite.</span></article>
+            <article class="detail-card"><strong>Product Analytics</strong><span>Bias distribution, balance ratio, activity trends, and trigger-word charts support real usage tracking.</span></article>
+        </div>
+    </div>
+
+    <div class="panel glass">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Technology Stack</span>
+                <h3>Implementation Summary</h3>
+            </div>
+        </div>
+        <div class="detail-list">
+            <article class="detail-card"><strong>Backend</strong><span>Flask app factory with validation, authentication, and API-driven product flows.</span></article>
+            <article class="detail-card"><strong>AI Layer</strong><span>{{ metrics.model_name }} with calibrated confidence and rule-based explanation support.</span></article>
+            <article class="detail-card"><strong>Data Layer</strong><span>SQLite-backed user storage for account data, thought history, drafts, and chat turns.</span></article>
+            <article class="detail-card"><strong>Frontend</strong><span>Responsive glassmorphism UI, animated transitions, and Chart.js dashboards.</span></article>
+        </div>
+    </div>
+
+    <div class="panel glass">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Readiness</span>
+                <h3>Deployment Direction</h3>
+            </div>
+        </div>
+        <div class="detail-list">
+            <article class="detail-card"><strong>Authentication</strong><span>Users land on a focused login screen and only reach the workspace after signing in.</span></article>
+            <article class="detail-card"><strong>Scalability</strong><span>The codebase is organized around modular backend services and reusable UI rendering patterns.</span></article>
+            <article class="detail-card"><strong>Resilience</strong><span>Health endpoint, structured responses, validation, and error handling support deployment workflows.</span></article>
+            <article class="detail-card"><strong>Upgrade Path</strong><span>{{ "Transformer support is available." if metrics.transformer_ready else "Transformer support can be added later without changing the product shell." }}</span></article>
+        </div>
+    </div>
+</section>
+{% endblock %}

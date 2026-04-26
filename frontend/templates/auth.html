@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Access Workspace | AI Cognitive Bias Detection Platform{% endblock %}
+
+{% block content %}
+<section class="auth-stage">
+    <div id="authCard" class="auth-card glass reveal" data-auth-mode="{{ auth_mode }}">
+        <div class="auth-copy">
+            <span class="eyebrow">Secure Access</span>
+            <h2>Bias detection that feels like a real product, not a demo.</h2>
+            <p>Sign in to access your personal dashboard, thought history, AI chat assistant, and analytics workspace.</p>
+
+            <div class="auth-feature-grid">
+                <article class="feature-card">
+                    <strong>Personal Dashboard</strong>
+                    <span>Track total analyses, dominant bias patterns, confidence trends, and balance over time.</span>
+                </article>
+                <article class="feature-card">
+                    <strong>AI Reframing</strong>
+                    <span>Every result includes a clearer explanation, suggested reframe, and highlighted trigger words.</span>
+                </article>
+                <article class="feature-card">
+                    <strong>Thought Memory</strong>
+                    <span>Your drafts, analyses, and assistant conversations stay tied to your account.</span>
+                </article>
+            </div>
+        </div>
+
+        <div class="auth-panel">
+            <div class="auth-tabs" role="tablist" aria-label="Authentication">
+                <span class="auth-tab-indicator" aria-hidden="true"></span>
+                <button class="auth-tab {% if auth_mode == 'login' %}active{% endif %}" type="button" data-auth-tab="login">Login</button>
+                <button class="auth-tab {% if auth_mode == 'signup' %}active{% endif %}" type="button" data-auth-tab="signup">Create Account</button>
+            </div>
+
+            {% if error_message %}
+            <div class="form-alert">{{ error_message }}</div>
+            {% endif %}
+
+            <div class="auth-form-shell">
+                <form class="auth-form auth-form-login" method="post" action="/login" data-auth-form="login">
+                    <input type="hidden" name="auth_mode" value="login">
+                    <input type="hidden" name="next" value="{{ next_target }}">
+
+                    <div class="auth-head">
+                        <span class="eyebrow subtle">Welcome Back</span>
+                        <h3>Sign in to your workspace</h3>
+                        <p>Continue to your dashboard and active analytics.</p>
+                    </div>
+
+                    <label class="auth-field">
+                        <span>Email</span>
+                        <input type="email" name="email" value="{{ form_values.login_email }}" placeholder="you@example.com" required>
+                    </label>
+
+                    <label class="auth-field">
+                        <span>Password</span>
+                        <input type="password" name="password" placeholder="Enter your password" minlength="8" required>
+                    </label>
+
+                    <button class="primary-btn auth-submit" type="submit">Sign In</button>
+                    <p class="auth-switch-copy">
+                        Don't have an account?
+                        <button class="text-btn" type="button" data-auth-toggle="signup">Create one</button>
+                    </p>
+                </form>
+
+                <form class="auth-form auth-form-signup" method="post" action="/login" data-auth-form="signup">
+                    <input type="hidden" name="auth_mode" value="signup">
+                    <input type="hidden" name="next" value="{{ next_target }}">
+
+                    <div class="auth-head">
+                        <span class="eyebrow subtle">Create Account</span>
+                        <h3>Launch your private workspace</h3>
+                        <p>Set up secure access for saved thoughts, insights, and assistant support.</p>
+                    </div>
+
+                    <label class="auth-field">
+                        <span>Name</span>
+                        <input type="text" name="full_name" value="{{ form_values.signup_name }}" placeholder="Your full name" minlength="2" required>
+                    </label>
+
+                    <label class="auth-field">
+                        <span>Email</span>
+                        <input type="email" name="email" value="{{ form_values.signup_email }}" placeholder="you@example.com" required>
+                    </label>
+
+                    <label class="auth-field">
+                        <span>Password</span>
+                        <input type="password" name="password" placeholder="Use at least 8 characters" minlength="8" required>
+                    </label>
+
+                    <label class="auth-field">
+                        <span>Confirm Password</span>
+                        <input type="password" name="confirm_password" placeholder="Re-enter your password" minlength="8" required>
+                    </label>
+
+                    <button class="primary-btn auth-submit" type="submit">Create Account</button>
+                    <p class="auth-switch-copy">
+                        Already have an account?
+                        <button class="text-btn" type="button" data-auth-toggle="login">Sign in</button>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

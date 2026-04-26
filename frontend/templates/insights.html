@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics | AI Cognitive Bias Detection Platform{% endblock %}
+
+{% block content %}
+<section class="hero-grid reveal">
+    <div class="hero-copy glass">
+        <span class="eyebrow">Analytics Dashboard</span>
+        <h2>Operational insight into your cognitive bias patterns, confidence trends, and recent activity.</h2>
+        <p>Review performance signals, distribution patterns, and the most recent result in a dedicated analytics view.</p>
+
+        <div class="stats-grid">
+            <article class="metric-card">
+                <span>Total Analyses</span>
+                <strong>{{ analytics.history_count }}</strong>
+            </article>
+            <article class="metric-card">
+                <span>Most Common Bias</span>
+                <strong>{{ analytics.most_common_bias }}</strong>
+            </article>
+            <article class="metric-card">
+                <span>Average Thinking Score</span>
+                <strong>{{ analytics.avg_thinking_score }} / 100</strong>
+            </article>
+        </div>
+    </div>
+
+    <div class="hero-side glass">
+        <span class="eyebrow">Model Snapshot</span>
+        <div class="detail-list">
+            <article class="detail-card">
+                <strong>Precision</strong>
+                <span>{{ (metrics.precision * 100) | round(1) }}%</span>
+            </article>
+            <article class="detail-card">
+                <strong>Recall</strong>
+                <span>{{ (metrics.recall * 100) | round(1) }}%</span>
+            </article>
+            <article class="detail-card">
+                <strong>Benchmark</strong>
+                <span>{{ metrics.benchmark_type }}</span>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="analytics-grid reveal">
+    <div class="panel glass analytics-card">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Bias Distribution</span>
+                <h3>Most Frequent Biases</h3>
+            </div>
+        </div>
+        <div id="insightsBiasChartShell" class="chart-shell chart-container">
+            <canvas id="insightsBiasChart" class="chart-canvas" data-chart='{{ analytics.bias_distribution|tojson }}'></canvas>
+        </div>
+    </div>
+
+    <div class="panel glass analytics-card">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Thinking Balance</span>
+                <h3>Negative vs Balanced</h3>
+            </div>
+        </div>
+        <div id="insightsSentimentChartShell" class="chart-shell chart-container">
+            <canvas id="insightsSentimentChart" class="chart-canvas" data-chart='{{ analytics.negative_vs_balanced|tojson }}'></canvas>
+        </div>
+    </div>
+
+    <div class="panel glass analytics-card">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Activity</span>
+                <h3>Timeline Trend</h3>
+            </div>
+        </div>
+        <div id="insightsTimelineChartShell" class="chart-shell chart-container">
+            <canvas id="insightsTimelineChart" class="chart-canvas" data-chart='{{ analytics.timeline|tojson }}'></canvas>
+        </div>
+    </div>
+
+    <div class="panel glass weekly-progress-panel insights-weekly-stats analytics-card">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Weekly Progress</span>
+                <h3>Weekly Stats</h3>
+            </div>
+        </div>
+        <div class="progress-kpis">
+            <article class="insight-card">
+                <span>Week-over-Week</span>
+                <strong id="weeklyImprovementValue" data-value="{{ analytics.weekly_progress.improvement }}" data-direction="{{ analytics.weekly_progress.direction }}">
+                    {% if analytics.weekly_progress.improvement > 0 %}+{% endif %}{{ analytics.weekly_progress.improvement }}%
+                </strong>
+            </article>
+            <article class="insight-card">
+                <span>Trend</span>
+                <strong id="weeklyDirectionValue">{{ analytics.weekly_progress.direction | replace('_', ' ') | title }}</strong>
+            </article>
+        </div>
+        <p id="weeklyProgressSummaryValue" class="progress-summary">{{ analytics.weekly_progress.summary }}</p>
+    </div>
+
+    <div class="panel glass weekly-progress-panel insights-weekly-chart analytics-card">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Weekly Progress</span>
+                <h3>Negative Thinking Trend</h3>
+            </div>
+        </div>
+        <div id="weeklyProgressChartShell" class="chart-shell chart-container">
+            <canvas id="weeklyProgressChart" class="chart-canvas" data-chart='{{ analytics.weekly_progress.series|tojson }}'></canvas>
+        </div>
+    </div>
+</section>
+
+<section class="dashboard-grid analysis-grid reveal">
+    <div class="panel glass analysis-table-panel analytics-card left-panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">History Table</span>
+                <h3>Thought Timeline</h3>
+                <p>Select any result to inspect the explanation and suggested reframe.</p>
+            </div>
+        </div>
+        <div class="history-table-shell table-body">
+            <table class="history-table">
+                <colgroup>
+                    <col class="history-col-thought" />
+                    <col class="history-col-bias" />
+                    <col class="history-col-confidence" />
+                    <col class="history-col-timestamp" />
+                </colgroup>
+                <thead>
+                    <tr class="history-row head">
+                        <th scope="col">Thought</th>
+                        <th scope="col">Bias</th>
+                        <th scope="col">Confidence</th>
+                        <th scope="col">Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in history %}
+                    <tr class="history-row">
+                        <td class="history-cell history-cell-thought">
+                            <a class="history-table-link" href="/insights?item={{ item.id }}" title="{{ item.text }}">{{ item.text }}</a>
+                        </td>
+                        <td class="history-cell history-cell-bias">
+                            <a class="history-table-link" href="/insights?item={{ item.id }}" title="{{ item.bias }}">{{ item.bias }}</a>
+                        </td>
+                        <td class="history-cell history-cell-confidence">
+                            <a class="history-table-link" href="/insights?item={{ item.id }}" title="{{ item.confidence_percent }}">{{ item.confidence_percent }}</a>
+                        </td>
+                        <td class="history-cell history-cell-timestamp">
+                            <a class="history-table-link" href="/insights?item={{ item.id }}" title="{{ item.timestamp }}">{{ item.timestamp }}</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr class="history-empty-row">
+                        <td colspan="4">
+                            <div class="empty-state">Analyze a thought from the dashboard to populate this view.</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel glass analysis-detail-panel analytics-card right-panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Selected Result</span>
+                <h3>Detailed Explanation</h3>
+                <p>Bias label, confidence, explanation, suggestion, and highlighted trigger language.</p>
+            </div>
+        </div>
+
+        <div class="analysis-detail-scroll details-body">
+            {% if selected_item %}
+            <div class="detail-block details-section">
+                <span class="badge">{{ selected_item.bias }}</span>
+                <h4>{{ selected_item.confidence_percent }} confidence | {{ selected_item.thinking_score }} / 100 | {{ selected_item.thinking_band }}</h4>
+                <p>{{ selected_item.explanation }}</p>
+            </div>
+
+            <div class="detail-block details-section">
+                <div class="detail-head">
+                    <h4>Balanced Thought</h4>
+                    <span>Healthier reframe</span>
+                </div>
+                <p>{{ selected_item.balanced_thought }}</p>
+            </div>
+
+            <div class="detail-block details-section">
+                <div class="detail-head">
+                    <h4>Helpful Suggestion</h4>
+                    <span>Next action</span>
+                </div>
+                <p>{{ selected_item.suggestion }}</p>
+            </div>
+
+            <div
+                class="highlighted-text"
+                data-highlight-preview="true"
+                data-text="{{ selected_item.text }}"
+                data-terms='{{ selected_item.highlight_terms|tojson }}'
+            >
+                {{ selected_item.text }}
+            </div>
+
+            <div class="pill-wrap small">
+                {% for term in selected_item.highlight_terms %}
+                <span class="pill">{{ term }}</span>
+                {% else %}
+                <span class="pill">No trigger terms recorded</span>
+                {% endfor %}
+            </div>
+
+            <div class="trigger-explanations">
+                {% for item in selected_item.highlight_details %}
+                <article class="trigger-note">
+                    <strong>{{ item.term }}</strong>
+                    <span>{{ item.explanation }}</span>
+                </article>
+                {% else %}
+                <div class="empty-state">No trigger explanations recorded.</div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">Select a thought to view detailed analysis</div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

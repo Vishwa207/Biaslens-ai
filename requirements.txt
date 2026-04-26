@@ -1,0 +1,11 @@
+flask>=3.0.0
+scikit-learn>=1.4.0
+
+# Optional transformer upgrade path
+# transformers>=4.40.0
+# torch>=2.2.0
+
+google-genai>=0.2.0
+python-dotenv>=1.0.0
+Flask-SQLAlchemy>=3.1.1
+psycopg2-binary>=2.9.9

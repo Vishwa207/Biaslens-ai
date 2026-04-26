@@ -1,0 +1,93 @@
+{
+  "accuracy": 0.9714,
+  "precision": 0.974,
+  "recall": 0.9714,
+  "f1_score": 0.9714,
+  "confusion_labels": [
+    "Balanced Thinking",
+    "Black-and-White Thinking",
+    "Catastrophizing",
+    "Emotional Reasoning",
+    "Mind Reading",
+    "Overgeneralization",
+    "Personalization"
+  ],
+  "confusion_matrix": [
+    [
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      9,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      10,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      10,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      10,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      9
+    ]
+  ],
+  "dataset_size": 70,
+  "bias_distribution": {
+    "Overgeneralization": 10,
+    "Catastrophizing": 10,
+    "Black-and-White Thinking": 10,
+    "Emotional Reasoning": 10,
+    "Mind Reading": 10,
+    "Personalization": 10,
+    "Balanced Thinking": 10
+  },
+  "benchmark_type": "curated internal benchmark",
+  "model_name": "TF-IDF + Linear SVM",
+  "transformer_ready": true
+}

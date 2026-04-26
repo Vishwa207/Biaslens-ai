@@ -1,0 +1,515 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | AI Cognitive Bias Detection Platform{% endblock %}
+
+{% block content %}
+<section class="hero-grid reveal">
+    <div class="hero-copy glass">
+        <span class="eyebrow">Executive Overview</span>
+        <h2>Analyze distorted thoughts, see balanced rewrites, and monitor cognitive risk in one premium workspace.</h2>
+        <p>The dashboard is built as a stable SaaS layout: a dedicated analysis rail on the left, a sticky intelligence sidebar on the right, and analytics below for deeper review.</p>
+
+        <div class="stats-grid">
+            <article class="metric-card">
+                <span>Total Analyses</span>
+                <strong id="analysisCountValue">{{ analytics.history_count }}</strong>
+            </article>
+            <article class="metric-card">
+                <span>Most Common Bias</span>
+                <strong id="commonBiasValue">{{ analytics.most_common_bias }}</strong>
+            </article>
+            <article class="metric-card">
+                <span>Thinking Health</span>
+                <strong id="balancedRatioValue">{{ analytics.balanced_ratio }}%</strong>
+            </article>
+        </div>
+    </div>
+
+    <div class="hero-side glass">
+        <span class="eyebrow">Trend Summary</span>
+        <h3 id="trendSummaryValue">{{ analytics.trend_summary }}</h3>
+        <div class="detail-list">
+            <article class="detail-card">
+                <strong>Saved Drafts</strong>
+                <span id="savedCountValue">{{ saved_items|length }}</span>
+            </article>
+            <article class="detail-card">
+                <strong>Average Confidence</strong>
+                <span id="avgConfidenceValue">{{ analytics.avg_confidence }}%</span>
+            </article>
+            <article class="detail-card">
+                <strong>Chat Turns</strong>
+                <span id="chatCountValue">{{ chat_messages|length }}</span>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="workspace-grid reveal">
+    <div class="workspace-main">
+        <div class="panel glass analysis-panel workspace-card analytics-card left-panel">
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow">Analyze Thought</span>
+                    <h3>Bias Detection Workspace</h3>
+                    <p>Paste a thought, run the model, and review the structured explanation without breaking the layout.</p>
+                </div>
+                <div id="loader" class="loader" aria-live="polite">
+                    <span class="loader-pulse"></span>
+                    <span>Analyzing</span>
+                </div>
+            </div>
+
+            <div class="input-shell">
+                <div class="input-head">
+                    <label for="textInput">Original Thought</label>
+                    <span>Choose a prompt or write your own inner dialogue.</span>
+                </div>
+
+                <div class="example-strip">
+                    <span class="example-label">Quick prompts</span>
+                    <div class="pill-wrap example-pills">
+                        {% for label, texts in examples.items() %}
+                        <button class="pill example-pill" type="button" data-examples="{{ texts|tojson|forceescape }}">{{ label }}</button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <textarea id="textInput" placeholder="Try: I always fail, so nothing will ever get better."></textarea>
+            </div>
+
+            <div class="toolbar">
+                <button class="primary-btn" id="analyzeBtn" type="button">Analyze Text</button>
+                <button class="secondary-btn" id="saveBtn" type="button">Save Draft</button>
+                <button class="secondary-btn" id="clearBtn" type="button">Clear</button>
+            </div>
+
+            <div id="resultPanel" class="result-panel is-empty">
+                <div class="result-top">
+                    <div>
+                        <span id="biasBadge" class="badge">Awaiting analysis</span>
+                        <h3>Result Intelligence</h3>
+                    </div>
+                    <div id="confidenceBadge" class="badge subtle">0%</div>
+                </div>
+
+                <div class="empty-state result-empty-state">Select a thought to view detailed analysis</div>
+
+                <div class="confidence-shell">
+                    <div class="confidence-head">
+                        <span>Confidence Bar</span>
+                        <strong id="confidenceMeterLabel">0%</strong>
+                    </div>
+                    <div class="confidence-bar">
+                        <span id="confidenceProgress" style="width: 0%;"></span>
+                    </div>
+                </div>
+
+                <div class="result-scroll">
+                    <div class="result-grid result-grid-four">
+                        <article class="result-card">
+                            <span>Bias Type</span>
+                            <strong id="biasValue">-</strong>
+                        </article>
+                        <article class="result-card" id="thinkingScoreCard">
+                            <span>Thinking Score</span>
+                            <strong id="thinkingScoreValue">-- / 100</strong>
+                        </article>
+                        <article class="result-card" id="thinkingBandCard">
+                            <span>Risk Label</span>
+                            <strong id="thinkingBandValue">-</strong>
+                        </article>
+                        <article class="result-card">
+                            <span>Thinking Pattern</span>
+                            <strong id="sentimentValue">-</strong>
+                        </article>
+                    </div>
+
+                    <div class="rewrite-grid">
+                        <article class="rewrite-card original">
+                            <div class="detail-head">
+                                <h4>Original Thought</h4>
+                                <span>Detected input</span>
+                            </div>
+                            <div
+                                id="highlightedText"
+                                class="highlighted-text"
+                                data-text=""
+                                data-terms='[]'
+                            >
+                                Analyze a thought to see highlighted trigger terms.
+                            </div>
+                        </article>
+
+                        <article class="rewrite-card balanced">
+                            <div class="detail-head">
+                                <h4>Balanced Thought</h4>
+                                <span>AI rewriting engine</span>
+                            </div>
+                            <p id="balancedThoughtValue">A grounded reframe will appear here after analysis.</p>
+                        </article>
+                    </div>
+
+                    <div class="detail-block details-section">
+                        <div class="detail-head">
+                            <h4>AI Explanation</h4>
+                            <span>Why this bias was selected</span>
+                        </div>
+                        <p id="explanationValue">Run an analysis to get a model explanation.</p>
+                    </div>
+
+                    <div class="detail-block details-section">
+                        <div class="detail-head">
+                            <h4>Helpful Suggestion</h4>
+                            <span>Next action to test the thought</span>
+                        </div>
+                        <p id="suggestionValue">A next-step suggestion will appear here after analysis.</p>
+                    </div>
+
+                    <div class="detail-block details-section">
+                        <div class="detail-head">
+                            <h4>Trigger Terms</h4>
+                            <span>Highlighted language signals</span>
+                        </div>
+                        <div id="matchedTerms" class="pill-wrap small">
+                            <span class="pill">No trigger terms yet</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-block details-section">
+                        <div class="detail-head">
+                            <h4>Trigger Explanations</h4>
+                            <span>Why these words were highlighted</span>
+                        </div>
+                        <div id="triggerExplanations" class="trigger-explanations">
+                            <div class="empty-state">Trigger explanations will appear after analysis.</div>
+                        </div>
+                    </div>
+
+                    <div class="detail-block details-section">
+                        <div class="detail-head">
+                            <h4>Alternative Predictions</h4>
+                            <span>Closest competing classifications</span>
+                        </div>
+                        <div id="alternatives" class="alt-list">
+                            <div class="empty-state">Alternative predictions will appear after analysis.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-actions">
+                    <button class="secondary-btn" id="continueChatBtn" type="button" {% if not latest %}disabled{% endif %}>Continue in Chat</button>
+                    <button class="secondary-btn" id="copyAnalysisBtn" type="button">Copy Report</button>
+                    <a class="secondary-btn" href="/insights">Open Analytics</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <aside class="workspace-sidebar">
+        <div class="sidebar-stack">
+            <div class="panel glass sidebar-card insights-sidebar analytics-card right-panel">
+                <div class="section-head">
+                    <div>
+                        <span class="eyebrow">Insights Panel</span>
+                        <h3>Decision Signals</h3>
+                        <p>Fast indicators that keep the right rail visually filled and useful.</p>
+                    </div>
+                </div>
+
+                <div class="insight-grid">
+                    <article class="insight-card">
+                        <span>Most Common Bias</span>
+                        <strong id="sidebarCommonBias">{{ analytics.most_common_bias }}</strong>
+                    </article>
+                    <article class="insight-card">
+                        <span>Most Used Word</span>
+                        <strong id="mostUsedWordValue">{{ analytics.most_used_word }}</strong>
+                    </article>
+                    <article class="insight-card">
+                        <span>Risk Level</span>
+                        <strong id="riskLevelValue">{{ analytics.risk_level }}</strong>
+                    </article>
+                    <article class="insight-card">
+                        <span>Risk Score</span>
+                        <strong id="riskScoreValue">{{ analytics.risk_score }} / 100</strong>
+                    </article>
+                </div>
+
+                <div class="risk-meter">
+                    <div class="detail-head">
+                        <h4>Risk Overview</h4>
+                        <span id="riskSummaryValue">{{ analytics.risk_summary }}</span>
+                    </div>
+                    <div class="confidence-bar risk-bar">
+                        <span id="riskProgress" style="width: 0%;"></span>
+                    </div>
+                </div>
+
+                <div class="smart-message" id="smartInsightMessageValue">{{ analytics.smart_insight_message }}</div>
+            </div>
+
+            <div class="panel glass sidebar-card analytics-card right-panel">
+                <div class="section-head">
+                    <div>
+                        <span class="eyebrow">History</span>
+                        <h3>Grouped Patterns</h3>
+                        <p>Grouped by recurring bias so repeat patterns are easier to spot.</p>
+                    </div>
+                </div>
+                <div id="historyList" class="history-list sidebar-feed history-feed">
+                    {% if analytics.grouped_history %}
+                        {% for item in analytics.grouped_history %}
+                        <button class="history-item timeline-item" type="button" data-text="{{ item.latest_text|e }}">
+                            <div class="history-item-head">
+                                <strong>{{ item.bias }}</strong>
+                                <span class="history-count">&times;{{ item.count }}</span>
+                            </div>
+                            <span>{{ item.latest_text }}</span>
+                            <div class="history-item-meta">
+                                <em>Latest | {{ item.latest_timestamp }}</em>
+                                <span class="history-chip {% if 'Low' in item.thinking_band %}tone-low{% elif 'Medium' in item.thinking_band %}tone-medium{% else %}tone-high{% endif %}">{{ item.thinking_band }}</span>
+                            </div>
+                        </button>
+                        {% endfor %}
+                    {% else %}
+                    <div class="empty-state">Your thought history will appear here after the first analysis.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="panel glass sidebar-card analytics-card right-panel">
+                <div class="section-head">
+                    <div>
+                        <span class="eyebrow">Drafts</span>
+                        <h3>Saved Inputs</h3>
+                        <p>Reusable entries for future analysis sessions.</p>
+                    </div>
+                </div>
+                <div id="savedList" class="saved-list sidebar-feed draft-feed">
+                    {% if saved_items %}
+                        {% for item in saved_items %}
+                        <button class="saved-item" type="button" data-text="{{ item.text|e }}">
+                            <strong>{{ item.timestamp }}</strong>
+                            <span>{{ item.text }}</span>
+                        </button>
+                        {% endfor %}
+                    {% else %}
+                    <div class="empty-state">Saved drafts will appear here once you store them.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </aside>
+</section>
+
+{% set analytics_trigger_words = analytics.top_triggers if analytics.top_triggers else [] %}
+{% if not analytics_trigger_words and analytics.most_used_word and analytics.most_used_word != "No clear trigger yet" %}
+    {% set analytics_trigger_words = [analytics.most_used_word] %}
+{% endif %}
+{% set has_common_bias = analytics.most_common_bias and analytics.most_common_bias != "No analyses yet" %}
+{% set has_trigger_word = analytics.most_used_word and analytics.most_used_word != "No clear trigger yet" %}
+{% if analytics.smart_insight_message %}
+    {% set analytics_insight_message = analytics.smart_insight_message %}
+{% elif has_common_bias and has_trigger_word %}
+    {% set analytics_insight_message = "Your thinking shows frequent " ~ analytics.most_common_bias|lower ~ " patterns, and repeated words like '" ~ analytics.most_used_word ~ "' may be reinforcing them." %}
+{% elif has_common_bias %}
+    {% set analytics_insight_message = "Your thinking shows frequent " ~ analytics.most_common_bias|lower ~ " patterns across recent entries." %}
+{% else %}
+    {% set analytics_insight_message = "Your recent entries are starting to reveal cognitive patterns. Keep analyzing thoughts to unlock more personalized guidance." %}
+{% endif %}
+
+<section class="analytics-hero-grid reveal">
+    <div class="panel glass analytics-hero-panel analytics-card featured">
+        <div class="analytics-hero-main">
+            <div class="analytics-headline-row">
+                <span class="eyebrow">AI Insight</span>
+                <span class="analytics-live-pill">
+                    <span class="analytics-live-dot"></span>
+                    Live snapshot
+                </span>
+            </div>
+
+            <div class="analytics-card-head analytics-hero-copy">
+                <h3>Your Cognitive Snapshot</h3>
+                <p id="analyticsInsightMessageValue">{{ analytics_insight_message }}</p>
+            </div>
+
+            <div class="analytics-trigger-strip">
+                <div class="analytics-trigger-copy">
+                    <span class="analytics-strip-label">Weekly Summary</span>
+                    <p id="analyticsWeeklySummaryValue">{{ analytics.weekly_progress.summary }}</p>
+                </div>
+                <div id="analyticsTriggerWordsList" class="analytics-trigger-words" data-triggers='{{ analytics_trigger_words|tojson }}'>
+                    {% if analytics_trigger_words %}
+                        {% for trigger_word in analytics_trigger_words[:4] %}
+                        <span class="analytics-trigger-chip">{{ trigger_word }}</span>
+                        {% endfor %}
+                    {% else %}
+                    <span class="analytics-trigger-chip analytics-trigger-chip-muted">No strong trigger words yet</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="analytics-hero-side">
+            <div class="analytics-score-panel">
+                <span>Cognitive Score</span>
+                <strong id="analyticsCognitiveScoreValue">{{ analytics.avg_thinking_score or 0 }} / 100</strong>
+                <div class="analytics-progress-track">
+                    <span id="analyticsCognitiveProgress" style="width: 0%;"></span>
+                </div>
+                <small>Reflects how balanced your recent thought patterns look overall.</small>
+            </div>
+
+            <div class="analytics-hero-metrics">
+                <article class="analytics-kpi-card">
+                    <span>Risk Level</span>
+                    <strong id="analyticsRiskLevelBadge" class="analytics-status-pill">{{ analytics.risk_level }}</strong>
+                    <p id="analyticsRiskSummaryInline">{{ analytics.risk_summary }}</p>
+                </article>
+                <article class="analytics-kpi-card">
+                    <span>Trend Status</span>
+                    <strong id="analyticsTrendStatusValue" class="analytics-status-pill">{{ analytics.weekly_progress.direction | replace('_', ' ') | title }}</strong>
+                    <p id="analyticsTrendNarrativeValue">{{ analytics.trend_summary }}</p>
+                </article>
+                <article class="analytics-kpi-card">
+                    <span>Trigger Focus</span>
+                    <strong id="analyticsTriggerWordValue">{{ analytics.most_used_word }}</strong>
+                    <p>Most repeated signal in recent entries.</p>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="analytics-grid dashboard-analytics-grid reveal">
+    <div class="panel glass dashboard-analytics-card dashboard-analytics-card-chart analytics-card featured">
+        <div class="analytics-card-head">
+            <span class="eyebrow">Analytics</span>
+            <h3>Bias Distribution</h3>
+            <p>See which cognitive distortions appear most often in your recent analyses.</p>
+        </div>
+        <div id="biasChartShell" class="chart-shell chart-container analytics-chart-shell">
+            <canvas id="biasChart" class="chart-canvas" data-chart='{{ analytics.bias_distribution|tojson }}'></canvas>
+        </div>
+    </div>
+
+    <div class="panel glass dashboard-analytics-card dashboard-analytics-card-chart analytics-card">
+        <div class="analytics-card-head">
+            <span class="eyebrow">Thinking Balance</span>
+            <h3>Negative vs Balanced Thinking</h3>
+            <p>Track whether your language is shifting toward balanced thinking.</p>
+        </div>
+        <div id="sentimentChartShell" class="chart-shell chart-container analytics-chart-shell">
+            <canvas id="sentimentChart" class="chart-canvas" data-chart='{{ analytics.negative_vs_balanced|tojson }}'></canvas>
+        </div>
+    </div>
+
+    <div class="panel glass dashboard-analytics-card dashboard-analytics-card-chart analytics-card">
+        <div class="analytics-card-head">
+            <span class="eyebrow">Momentum</span>
+            <h3>Recent Activity Trend</h3>
+            <p>How often you are using the analyzer across recent sessions.</p>
+        </div>
+        <div id="timelineChartShell" class="chart-shell chart-container analytics-chart-shell">
+            <canvas id="timelineChart" class="chart-canvas" data-chart='{{ analytics.timeline|tojson }}'></canvas>
+        </div>
+    </div>
+
+    <div class="panel glass dashboard-analytics-card dashboard-analytics-card-summary analytics-card">
+        <div class="analytics-card-head">
+            <span class="eyebrow">Pattern Summary</span>
+            <h3>Weekly Interpretation</h3>
+            <p>Turn recent cognitive patterns into a short, readable summary you can act on.</p>
+        </div>
+
+        <div class="dashboard-summary-metrics">
+            <article class="analytics-stat-card analytics-stat-card-active">
+                <span>Most Frequent Bias</span>
+                <strong id="analyticsMostCommonBiasValue">{{ analytics.most_common_bias }}</strong>
+            </article>
+            <article class="analytics-stat-card">
+                <span>Risk Score</span>
+                <strong id="analyticsRiskScoreBadgeValue">{{ analytics.risk_score }} / 100</strong>
+            </article>
+        </div>
+
+        <div class="smart-message analytics-card-message" id="analyticsTrendSummaryValue">{{ analytics.trend_summary }}</div>
+    </div>
+</section>
+
+<section class="dashboard-analytics-lower-grid reveal">
+    <div class="panel glass dashboard-analytics-card dashboard-analytics-card-stats analytics-card">
+        <div class="analytics-card-head">
+            <span class="eyebrow">Weekly Progress</span>
+            <h3>Weekly Stats</h3>
+            <p>Quick read on your week-over-week change in negative thinking.</p>
+        </div>
+
+        <div class="dashboard-analytics-stats">
+            <article class="analytics-stat-card analytics-stat-card-active">
+                <span>Week-over-Week</span>
+                <strong id="weeklyImprovementValue" data-value="{{ analytics.weekly_progress.improvement }}" data-direction="{{ analytics.weekly_progress.direction }}">
+                    {% if analytics.weekly_progress.improvement > 0 %}+{% endif %}{{ analytics.weekly_progress.improvement }}%
+                </strong>
+            </article>
+            <article class="analytics-stat-card">
+                <span>Trend</span>
+                <strong id="weeklyDirectionValue">{{ analytics.weekly_progress.direction | replace('_', ' ') | title }}</strong>
+            </article>
+        </div>
+
+        <p id="weeklyProgressSummaryValue" class="progress-summary analytics-card-note">{{ analytics.weekly_progress.summary }}</p>
+    </div>
+
+    <div class="panel glass dashboard-analytics-card dashboard-analytics-card-chart weekly-progress-panel analytics-card">
+        <div class="analytics-card-head">
+            <span class="eyebrow">Weekly Progress</span>
+            <h3>Negative Thinking Trend</h3>
+            <p>Track how much of your language each week still leans negative.</p>
+        </div>
+
+        <div id="weeklyProgressChartShell" class="chart-shell chart-container analytics-chart-shell">
+            <canvas id="weeklyProgressChart" class="chart-canvas" data-chart='{{ analytics.weekly_progress.series|tojson }}'></canvas>
+        </div>
+    </div>
+</section>
+
+<section class="dashboard-chat-grid reveal">
+    <div class="panel glass chat-panel analytics-card">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">AI Chat Assistant</span>
+                <h3>Continue the Conversation</h3>
+                <p>Move from one-off analysis into a guided chat about the thought, the bias, and a healthier rewrite.</p>
+            </div>
+        </div>
+
+        <div id="chatMessages" class="chat-messages">
+            {% if chat_messages %}
+                {% for message in chat_messages %}
+                <article class="chat-message {{ message.role }}">
+                    <span class="chat-role">{{ "AI Guide" if message.role == "assistant" else "You" }}</span>
+                    <p>{{ message.content }}</p>
+                    {% if message.role == "assistant" and message.bias %}
+                    <div class="chat-meta">
+                        <span>{{ message.bias }}</span>
+                        <span>{{ message.confidence_percent }}</span>
+                    </div>
+                    {% endif %}
+                </article>
+                {% endfor %}
+            {% else %}
+            <div class="empty-state">Start the conversation with a thought like "I always mess things up."</div>
+            {% endif %}
+        </div>
+
+        <form id="chatForm" class="chat-form">
+            <label class="sr-only" for="chatInput">Ask the AI assistant</label>
+            <input id="chatInput" type="text" placeholder="Describe a thought and ask the assistant to analyze it.">
+            <button class="primary-btn" id="chatSendBtn" type="submit">Send</button>
+        </form>
+    </div>
+</section>
+{% endblock %}
